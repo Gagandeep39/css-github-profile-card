@@ -19,9 +19,21 @@ async function getUser(username) {
   try {
     const { data } = await axios(API_URL + username);
     createUserCard(data);
+    getRepos(username);
   } catch (error) {
     if (error.response.status === 404)
       createErrorCard('No profile with entered username');
+  }
+}
+
+// MFetch Repos
+async function getRepos(username) {
+  try {
+    const { data } = await axios(API_URL + username + '/repos?sort=created');
+    addReposToCard(data);
+  } catch (error) {
+    if (error.response.status === 404)
+      createErrorCard('Problem fetching Repos');
   }
 }
 
@@ -67,4 +79,17 @@ function createErrorCard(message) {
   </div>
   `;
   main.innerHTML = cardElement;
+}
+
+function addReposToCard(repos) {
+  const reposList = document.getElementById('repos');
+  repos.slice(0, 5).forEach((repo) => {
+    const repoEl = document.createElement('a');
+    repoEl.classList.add('repos');
+    repoEl.href = repo.html_url;
+    repoEl.target = '_blank';
+    repoEl.innerText = repo.name;
+
+    reposList.appendChild(repoEl);
+  });
 }
